@@ -15,48 +15,14 @@
  * Arguments:
  * app_id    ID to use for this application
  */
-cqc_lib *cqc_init(int app_id)
+cqc_ctx *cqc_init(int app_id)
 {
-    cqc_lib *cqc;
-
     /* Initialize CQC Data structure */
-    cqc = (cqc_lib *)malloc(sizeof(cqc_lib));
-    memset((char *) cqc, 0x00, sizeof(cqc_lib));
+    cqc_ctx *cqc = (cqc_ctx *)malloc(sizeof(cqc_ctx));
+    memset(cqc, 0x00, sizeof(cqc_ctx));
     cqc->app_id = app_id;
 
     return cqc;
-}
-
-/*
- * cqc_error
- *
- * Print the appropriate error message for the error code received.
- */
-static void cqc_error(uint8_t type)
-{
-    switch(type) {
-    case CQC_ERR_GENERAL:
-        fprintf(stderr,"CQC ERROR: General error.\n");
-        break;
-    case CQC_ERR_NOQUBIT:
-        fprintf(stderr,"CQC ERROR: No more qubits available.\n");
-        break;
-    case CQC_ERR_UNSUPP:
-        fprintf(stderr,"CQC ERROR: Command not supported.\n");
-        break;
-    case CQC_ERR_TIMEOUT:
-        fprintf(stderr,"CQC ERROR: Timeout.\n");
-        break;
-    case CQC_ERR_INUSE:
-        fprintf(stderr,"CQC ERROR: Qubit already in use.\n");
-        break;
-    case CQC_ERR_UNKNOWN:
-        fprintf(stderr,"CQC ERROR: Unknown qubit ID.");
-        break;
-    default:
-        fprintf(stderr,"CQC ERROR: Unknown error type.\n");
-    }
-    return;
 }
 
 /*
@@ -68,7 +34,7 @@ static void cqc_error(uint8_t type)
  * hostname     hostname to connect to
  * portno       port number to connect to
  */
-int cqc_connect(cqc_lib *cqc, char *hostname, int portno)
+int cqc_connect(cqc_ctx *cqc, char *hostname, int portno)
 {
     int sock;
     struct sockaddr_in serv_addr;
@@ -110,7 +76,7 @@ int cqc_connect(cqc_lib *cqc, char *hostname, int portno)
  *
  * Close the connection to the back-end.
  */
-void cqc_close(cqc_lib *cqc)
+void cqc_close(cqc_ctx *cqc)
 {
     close(cqc->sockfd);
 }
@@ -120,9 +86,41 @@ void cqc_close(cqc_lib *cqc)
  *
  * Free allocated memory.
  */
-void cqc_destroy(cqc_lib *cqc)
+void cqc_destroy(cqc_ctx *cqc)
 {
     free(cqc);
+}
+
+/*
+ * cqc_error
+ *
+ * Print the appropriate error message for the error code received.
+ */
+static void cqc_error(uint8_t type)
+{
+    switch(type) {
+    case CQC_ERR_GENERAL:
+        fprintf(stderr,"CQC ERROR: General error.\n");
+        break;
+    case CQC_ERR_NOQUBIT:
+        fprintf(stderr,"CQC ERROR: No more qubits available.\n");
+        break;
+    case CQC_ERR_UNSUPP:
+        fprintf(stderr,"CQC ERROR: Command not supported.\n");
+        break;
+    case CQC_ERR_TIMEOUT:
+        fprintf(stderr,"CQC ERROR: Timeout.\n");
+        break;
+    case CQC_ERR_INUSE:
+        fprintf(stderr,"CQC ERROR: Qubit already in use.\n");
+        break;
+    case CQC_ERR_UNKNOWN:
+        fprintf(stderr,"CQC ERROR: Unknown qubit ID.");
+        break;
+    default:
+        fprintf(stderr,"CQC ERROR: Unknown error type.\n");
+    }
+    return;
 }
 
 /*
@@ -130,7 +128,7 @@ void cqc_destroy(cqc_lib *cqc)
  *
  * Prepare and sends CQC header
  */
-static int send_cqc_header(cqc_lib *cqc, uint8_t type, uint32_t len)
+static int send_cqc_header(cqc_ctx *cqc, uint8_t type, uint32_t len)
 {
     int n;
     cqcHeader cqcH;
@@ -160,7 +158,7 @@ static int send_cqc_header(cqc_lib *cqc, uint8_t type, uint32_t len)
  * notify      whether to request a DONE upon completion
  * length      length of any headers that are to follow
  */
-static int send_cqc_cmd(cqc_lib *cqc,
+static int send_cqc_cmd(cqc_ctx *cqc,
                         uint8_t command,
                         uint16_t qubit_id,
                         bool notify,
@@ -204,7 +202,7 @@ static int send_cqc_cmd(cqc_lib *cqc,
  *
  * Sends a HELLO message to the CQC Backend.
  */
-int cqc_hello(cqc_lib *cqc)
+int cqc_hello(cqc_ctx *cqc)
 {
     return send_cqc_header(cqc, CQC_TP_HELLO, 0);
 }
@@ -219,7 +217,7 @@ int cqc_hello(cqc_lib *cqc)
  * qubit_id    identifier of qubit on which to perform this command
  * notify      whether to request a DONE upon completion (0 = no, 1 = yes)
  */
-int cqc_simple_cmd(cqc_lib *cqc,
+int cqc_simple_cmd(cqc_ctx *cqc,
                    uint8_t command,
                    uint16_t qubit_id,
                    bool notify)
@@ -238,7 +236,7 @@ int cqc_simple_cmd(cqc_lib *cqc,
  * remote_node      address of remote node (IPv4)
  * remote_port      port for classical control info
  */
-int cqc_send(cqc_lib *cqc,
+int cqc_send(cqc_ctx *cqc,
              uint16_t qubit_id,
              uint16_t remote_app_id,
              uint16_t remote_port,
@@ -280,7 +278,7 @@ int cqc_send(cqc_lib *cqc,
  * Arguments:
  * qubit_id    id to assign to this qubit once it is received
  */
-int cqc_recv(cqc_lib *cqc, uint16_t *qubit_id)
+int cqc_recv(cqc_ctx *cqc, uint16_t *qubit_id)
 {
     int n;
     cqcHeader reply;
@@ -327,7 +325,7 @@ int cqc_recv(cqc_lib *cqc, uint16_t *qubit_id)
  * Arguments:
  * qubit_id    qubit to measure
  */
-int cqc_measure(cqc_lib *cqc, uint16_t qubit_id, uint8_t *meas_out)
+int cqc_measure(cqc_ctx *cqc, uint16_t qubit_id, uint8_t *meas_out)
 {
     int n;
     cqcHeader reply;
@@ -368,7 +366,7 @@ int cqc_measure(cqc_lib *cqc, uint16_t qubit_id, uint8_t *meas_out)
  * Arguments:
  * reps    number of replies to wait for
  */
-int cqc_wait_until_done(cqc_lib *cqc, unsigned int reps)
+int cqc_wait_until_done(cqc_ctx *cqc, unsigned int reps)
 {
     int i, n;
     cqcHeader reply;
@@ -405,7 +403,7 @@ int cqc_wait_until_done(cqc_lib *cqc, unsigned int reps)
  * Wait until qubit creation is confirmed. Returns qubit id if successful, -1 otherwise.
  *
  */
-int cqc_wait_until_newok(cqc_lib *cqc, uint16_t *qubit_id)
+int cqc_wait_until_newok(cqc_ctx *cqc, uint16_t *qubit_id)
 {
     int n;
     cqcHeader reply;
@@ -453,7 +451,7 @@ int cqc_wait_until_newok(cqc_lib *cqc, uint16_t *qubit_id)
  *  qubit1      number of the first qubit
  *  qubit2      number of the second qubit
  */
-int cqc_twoqubit(cqc_lib *cqc,
+int cqc_twoqubit(cqc_ctx *cqc,
                  uint8_t command,
                  uint16_t qubit1,
                  uint16_t qubit2)
@@ -513,7 +511,7 @@ static void cqc_ntoh_epr_hdr(entanglementHeader *ent_info)
  * remote_node      address of remote node to receive from (IPv4)
  * remote_port      port for classical control info
  */
-int cqc_epr(cqc_lib *cqc,
+int cqc_epr(cqc_ctx *cqc,
             uint16_t remote_app_id,
             uint16_t remote_port,
             uint32_t remote_node,
@@ -586,7 +584,7 @@ int cqc_epr(cqc_lib *cqc,
  * Request to receive EPR pair.
  *
  */
-int cqc_epr_recv(cqc_lib *cqc,
+int cqc_epr_recv(cqc_ctx *cqc,
                  uint16_t *qubit_id,
                  entanglementHeader *ent_info)
 {
