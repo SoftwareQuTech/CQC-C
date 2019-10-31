@@ -128,7 +128,7 @@ typedef struct
 } __attribute__((__packed__)) rotationHeader;
 
 /* Additional header used to send a qubit_id. */
-#define CQC_QUBIT_HDR_LENGTH    2
+#define CQC_QUBIT_HDR_LENGTH 2
 typedef struct
 {
     uint16_t qubit_id;          /* Qubit_id of the target qubit */
@@ -136,7 +136,7 @@ typedef struct
 
 /* Additional header used to send to which node to send information to. Used in
  * send and EPR commands. */
-#define CQC_COMM_HDR_LENGTH     8
+#define CQC_COMM_HDR_LENGTH 8
 typedef struct
 {
     uint16_t remote_app_id;     /* Remote application ID */
@@ -147,7 +147,7 @@ typedef struct
 /* Additional header used to send factory information. Factory commands are
  * used to tell the backend to do the following command or a sequence of
  * commands multiple times. */
-#define CQC_FACTORY_HDR_LENGTH  2
+#define CQC_FACTORY_HDR_LENGTH 2
 typedef struct
 {
     uint8_t num_iter;           /* Number of iterations to do the sequence */
@@ -162,7 +162,7 @@ typedef struct
 } __attribute__((__packed__)) assignHeader;
 
 /* Additional header used to send the outcome of a measurement. */
-#define CQC_MEASOUT_HDR_LENGTH  1
+#define CQC_MEASOUT_HDR_LENGTH 1
 typedef struct
 {
     uint8_t meas_out;           /* Measurement outcome */
