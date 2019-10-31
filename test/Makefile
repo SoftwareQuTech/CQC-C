@@ -8,7 +8,7 @@ BIN_DIR = ./bin
 DEPS = ../cqc.h $(SRC_DIR)/test.h
 CORE = ../cqc.c
 
-PROG=qubit send recv gates
+PROG=qubit send_recv gates
 ALL=$(addprefix $(BIN_DIR)/, $(PROG))
 
 .PHONY: all clean
