@@ -501,7 +501,8 @@ int cqc_twoqubit(cqc_ctx *cqc,
 /*
  * cqc_ntohll
  *
- * Convert 64-bit value to host order. Cannot use endian.h on a mac.
+ * Convert 64-bit value to host order. Linux needs endian.h, but cannot use
+ * endian.h on a mac so this is the portable solution.
  *
  */
 

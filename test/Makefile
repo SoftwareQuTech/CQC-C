@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-I../ -Wall -Werror -std=gnu11
+CFLAGS=-I../ -Wall -Werror -std=c11
 LIBS=-lm
 
 SRC_DIR = ./src
