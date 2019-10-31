@@ -1,5 +1,6 @@
 CC=gcc
 CFLAGS=-I../ -Wall -Werror -std=gnu11
+LIBS=-lm
 
 SRC_DIR = ./src
 BIN_DIR = ./bin
@@ -7,22 +8,16 @@ BIN_DIR = ./bin
 DEPS = ../cqc.h $(SRC_DIR)/test.h
 CORE = ../cqc.c
 
+PROG=qubit send recv gates
+ALL=$(addprefix $(BIN_DIR)/, $(PROG))
+
 .PHONY: all clean
 .DEFAULT: all
 
-all: qubit send recv gates
+all: $(ALL)
 
 clean:
-	rm -f $(BIN_DIR)/*
+	rm -f $(ALL)
 
-qubit: $(SRC_DIR)/test_qubit.c $(CORE) $(DEPS)
-	$(CC) $(CFLAGS) -o $(BIN_DIR)/$@ $< $(CORE)
-
-send: $(SRC_DIR)/test_send.c $(CORE) $(DEPS)
-	$(CC) $(CFLAGS) -o $(BIN_DIR)/$@ $< $(CORE)
-
-recv: $(SRC_DIR)/test_recv.c $(CORE) $(DEPS)
-	$(CC) $(CFLAGS) -o $(BIN_DIR)/$@ $< $(CORE)
-
-gates: $(SRC_DIR)/test_gates.c $(CORE) $(DEPS)
-	$(CC) $(CFLAGS) -o $(BIN_DIR)/$@ $< $(CORE) -lm
+$(BIN_DIR)/%: $(SRC_DIR)/test_%.c $(CORE) $(DEPS)
+	$(CC) $(CFLAGS) -o $@ $< $(CORE) $(LIBS)
