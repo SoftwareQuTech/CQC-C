@@ -11,8 +11,8 @@ these files, as well as a unix socket library (winsock is not supported).
 
 To build and test the library, proceed as follows:
 - `make` - compile the library and tests
-- `run_test.sh` - spin up the SimulaQron nodes and run the tests
+- `test/run_test.sh` - spin up the SimulaQron nodes and run the tests
 
-You should first run `./run_test.sh` in order to verify the install. This will
-check the gates using tomography. This requires a small amount of time, so be
-patient :-)
+You should first run `test/run_test.sh` in order to verify the install. This
+will check the gates using tomography. This requires a small amount of time, so
+be patient :-)
