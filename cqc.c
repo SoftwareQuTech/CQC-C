@@ -499,13 +499,13 @@ int cqc_twoqubit(cqc_ctx *cqc,
 }
 
 /*
- * ntohll
+ * cqc_ntohll
  *
  * Convert 64-bit value to host order. Cannot use endian.h on a mac.
  *
  */
 
-static uint64_t ntohll(const uint64_t input)
+static uint64_t cqc_ntohll(const uint64_t input)
 {
     uint8_t val[8];
 
@@ -535,8 +535,8 @@ static void cqc_ntoh_epr_hdr(entanglementHeader *ent_info)
     ent_info->port_B = ntohs(ent_info->port_B);
     ent_info->app_id_B = ntohs(ent_info->app_id_B);
     ent_info->id_AB = ntohl(ent_info->id_AB);
-    ent_info->timestamp = ntohll(ent_info->timestamp);
-    ent_info->tog = ntohll(ent_info->tog);
+    ent_info->timestamp = cqc_ntohll(ent_info->timestamp);
+    ent_info->tog = cqc_ntohll(ent_info->tog);
     ent_info->goodness = ntohs(ent_info->goodness);
 }
 
