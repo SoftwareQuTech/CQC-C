@@ -1,0 +1,35 @@
+{
+    "default": {
+        "nodes": {
+            "Alice": {
+                "app_socket": [
+                    "localhost",
+                    8805
+                ],
+                "cqc_socket": [
+                    "localhost",
+                    8803
+                ],
+                "vnode_socket": [
+                    "localhost",
+                    8801
+                ]
+            },
+            "Bob": {
+                "app_socket": [
+                    "localhost",
+                    8805
+                ],
+                "cqc_socket": [
+                    "localhost",
+                    8804
+                ],
+                "vnode_socket": [
+                    "localhost",
+                    8802
+                ]
+            }
+        },
+        "topology": null
+    }
+}
