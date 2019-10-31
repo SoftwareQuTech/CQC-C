@@ -21,7 +21,7 @@ before_install:
 - eval "${MATRIX_EVAL}"
 - sudo apt-get -y install python3 python3-pip
 install:
-- make all
+- make -C test all
 script:
 - pip3 install setuptools wheel
 - pip3 install simulaqron
