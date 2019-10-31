@@ -28,8 +28,8 @@ cqc_tomography_dir(cqc_lib *cqc,
                    uint8_t dir)
 {
     int i;
-    int outcome;
     int count;
+    uint8_t outcome;
     uint8_t cmd;
     float ratio;
     uint16_t qubit;
@@ -64,7 +64,7 @@ cqc_tomography_dir(cqc_lib *cqc,
             cqc_wait_until_done(cqc, 1);
         }
 
-        outcome = cqc_measure(cqc, qubit);
+        cqc_measure(cqc, qubit, &outcome);
         if (outcome < 0) {
             fprintf(stderr,"Tomography measurement failed for qubit %u.\n",
                     qubit);

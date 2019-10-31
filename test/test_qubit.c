@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
     char *hostname;
     cqc_lib *cqc;
     int app_id;
-    int outcome;
+    uint8_t outcome;
     uint16_t qubit;
 
     /* Retrieve arguments from command line */
@@ -29,12 +29,12 @@ int main(int argc, char *argv[]) {
     cqc_connect(cqc, hostname, portno);
 
     cqc_simple_cmd(cqc, CQC_CMD_NEW, 0, 0);
-    qubit = cqc_wait_until_newok(cqc);
+    cqc_wait_until_newok(cqc, &qubit);
 
     cqc_simple_cmd(cqc, CQC_CMD_H,qubit, 1);
     cqc_wait_until_done(cqc, 1);
 
-    outcome = cqc_measure(cqc, qubit);
+    cqc_measure(cqc, qubit, &outcome);
     printf("Outcome: %d\n",outcome);
 
     return 0;

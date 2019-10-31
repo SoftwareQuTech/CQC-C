@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     cqc_connect(cqc, hostname, portno);
 
     cqc_simple_cmd(cqc, CQC_CMD_NEW, 0, 0);
-    qubit = cqc_wait_until_newok(cqc);
+    cqc_wait_until_newok(cqc, &qubit);
 
     remoteNode.s_addr = ntohl(*((uint32_t *)server->h_addr_list[0]));
     cqc_send(cqc, qubit, app_id, remotePort, remoteNode.s_addr);

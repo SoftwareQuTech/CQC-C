@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     cqc = cqc_init(app_id);
     cqc_connect(cqc, hostname, portno);
 
-    qubit = cqc_recv(cqc);
+    cqc_recv(cqc, &qubit);
 
     printf("Received qubit %d\n", qubit);
 

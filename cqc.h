@@ -199,6 +199,10 @@ typedef struct
 
 /* CQC Library Definitions */
 
+/* Library return codes */
+#define CQC_LIB_OK   0
+#define CQC_LIB_ERR -1
+
 /* Definitions to access and manage CQC */
 typedef struct
 {
@@ -209,46 +213,40 @@ typedef struct
 /* CQC Function Definitions */
 
 cqc_lib *cqc_init(int app_id);
-void cqc_error(uint8_t type);
 int cqc_connect(cqc_lib *cqc, char *hostname, int portno);
-int cqc_cleanup(cqc_lib *cqc);
+void cqc_close(cqc_lib *cqc);
+void cqc_destroy(cqc_lib *cqc);
 
 int cqc_hello(cqc_lib *cqc);
+
 int cqc_simple_cmd(cqc_lib *cqc,
                    uint8_t command,
                    uint16_t qubit_id,
                    bool notify);
+
 int cqc_send(cqc_lib *cqc,
              uint16_t qubit_id,
              uint16_t remote_app_id,
              uint16_t remote_port,
              uint32_t remote_node);
-uint16_t cqc_recv(cqc_lib *cqc);
-int cqc_measure(cqc_lib *cqc, uint16_t qubit_id);
+int cqc_recv(cqc_lib *cqc, uint16_t *qubit_id);
+int cqc_measure(cqc_lib *cqc, uint16_t qubit_id, uint8_t *meas_out);
+
 int cqc_wait_until_done(cqc_lib *cqc, unsigned int reps);
-int cqc_wait_until_newok(cqc_lib *cqc);
+int cqc_wait_until_newok(cqc_lib *cqc, uint16_t *qubit_id);
+
 int cqc_twoqubit(cqc_lib *cqc,
                  uint8_t command,
                  uint16_t qubit1,
                  uint16_t qubit2);
-float cqc_tomography_dir(cqc_lib *cqc,
-                         uint16_t (*func)(cqc_lib *),
-                         uint32_t iter,
-                         uint8_t dir);
-int cqc_test_qubit(cqc_lib *cqc,
-                   uint16_t (*func)(cqc_lib *),
-                   uint32_t iter,
-                   float epsilon,
-                   float exp_x,
-                   float exp_y,
-                   float exp_z);
-
 int cqc_epr(cqc_lib *cqc,
             uint16_t remote_app_id,
             uint16_t remote_port,
             uint32_t remote_node,
+            uint16_t *qubit_id,
             entanglementHeader *ent_info);
 int cqc_epr_recv(cqc_lib *cqc,
+                 uint16_t *qubit_id,
                  entanglementHeader *ent_info);
 
 #endif

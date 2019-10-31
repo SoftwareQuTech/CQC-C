@@ -1,3 +1,4 @@
+#include <endian.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -14,8 +15,7 @@
  * Arguments:
  * app_id    ID to use for this application
  */
-cqc_lib *
-cqc_init(int app_id)
+cqc_lib *cqc_init(int app_id)
 {
     cqc_lib *cqc;
 
@@ -24,7 +24,7 @@ cqc_init(int app_id)
     memset((char *) cqc, 0x00, sizeof(cqc_lib));
     cqc->app_id = app_id;
 
-    return(cqc);
+    return cqc;
 }
 
 /*
@@ -32,8 +32,7 @@ cqc_init(int app_id)
  *
  * Print the appropriate error message for the error code received.
  */
-void
-cqc_error(uint8_t type)
+static void cqc_error(uint8_t type)
 {
     switch(type) {
     case CQC_ERR_GENERAL:
@@ -69,8 +68,7 @@ cqc_error(uint8_t type)
  * hostname     hostname to connect to
  * portno       port number to connect to
  */
-int
-cqc_connect(cqc_lib *cqc, char *hostname, int portno)
+int cqc_connect(cqc_lib *cqc, char *hostname, int portno)
 {
     int sock;
     struct sockaddr_in serv_addr;
@@ -80,13 +78,13 @@ cqc_connect(cqc_lib *cqc, char *hostname, int portno)
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
         perror("ERROR opening socket");
-        return(-1);
+        return CQC_LIB_ERR;
     }
 
     server = gethostbyname(hostname);
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
-        return(-1);
+        return CQC_LIB_ERR;
     }
 
     memset((char *) &serv_addr, 0x00, sizeof(serv_addr));
@@ -101,25 +99,30 @@ cqc_connect(cqc_lib *cqc, char *hostname, int portno)
                 (struct sockaddr*)&serv_addr,
                 sizeof(serv_addr)) < 0) {
         perror("ERROR - Cannot connect");
-        return(-1);
+        return CQC_LIB_ERR;
     }
     cqc->sockfd = sock;
-    return(0);
+    return CQC_LIB_OK;
 }
 
 /*
- * cqc_cleanup
+ * cqc_close
  *
- * Tear down the connection to the CQC Backend (if any) and free the memory of
- * the cqc structure.
+ * Close the connection to the back-end.
  */
-int
-cqc_cleanup(cqc_lib *cqc)
+void cqc_close(cqc_lib *cqc)
 {
     close(cqc->sockfd);
-    free(cqc);
+}
 
-    return(0);
+/*
+ * cqc_destroy
+ *
+ * Free allocated memory.
+ */
+void cqc_destroy(cqc_lib *cqc)
+{
+    free(cqc);
 }
 
 /*
@@ -127,8 +130,7 @@ cqc_cleanup(cqc_lib *cqc)
  *
  * Prepare and sends CQC header
  */
-static int
-send_cqc_header(cqc_lib *cqc, uint8_t type, uint32_t len)
+static int send_cqc_header(cqc_lib *cqc, uint8_t type, uint32_t len)
 {
     int n;
     cqcHeader cqcH;
@@ -142,9 +144,9 @@ send_cqc_header(cqc_lib *cqc, uint8_t type, uint32_t len)
     n = write(cqc->sockfd, &cqcH, CQC_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR writing to socket");
-        return(-1);
+        return CQC_LIB_ERR;
     }
-    return(n);
+    return n;
 }
 
 /*
@@ -158,14 +160,13 @@ send_cqc_header(cqc_lib *cqc, uint8_t type, uint32_t len)
  * notify      whether to request a DONE upon completion
  * length      length of any headers that are to follow
  */
-static int
-send_cqc_cmd(cqc_lib *cqc,
-             uint8_t command,
-             uint16_t qubit_id,
-             bool notify,
-             bool action,
-             bool block,
-             uint32_t length)
+static int send_cqc_cmd(cqc_lib *cqc,
+                        uint8_t command,
+                        uint16_t qubit_id,
+                        bool notify,
+                        bool action,
+                        bool block,
+                        uint32_t length)
 {
     int n, nt;
     cmdHeader cmdH;
@@ -191,11 +192,11 @@ send_cqc_cmd(cqc_lib *cqc,
     n = write(cqc->sockfd, &cmdH, CQC_CMD_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR writing to socket");
-        return(-1);
+        return CQC_LIB_ERR;
     }
     nt += n;
 
-    return(nt);
+    return nt;
 }
 
 /*
@@ -203,10 +204,9 @@ send_cqc_cmd(cqc_lib *cqc,
  *
  * Sends a HELLO message to the CQC Backend.
  */
-int
-cqc_hello(cqc_lib *cqc)
+int cqc_hello(cqc_lib *cqc)
 {
-    return(send_cqc_header(cqc, CQC_TP_HELLO, 0));
+    return send_cqc_header(cqc, CQC_TP_HELLO, 0);
 }
 
 /*
@@ -219,13 +219,12 @@ cqc_hello(cqc_lib *cqc)
  * qubit_id    identifier of qubit on which to perform this command
  * notify      whether to request a DONE upon completion (0 = no, 1 = yes)
  */
-int
-cqc_simple_cmd(cqc_lib *cqc,
-               uint8_t command,
-               uint16_t qubit_id,
-               bool notify)
+int cqc_simple_cmd(cqc_lib *cqc,
+                   uint8_t command,
+                   uint16_t qubit_id,
+                   bool notify)
 {
-    return(send_cqc_cmd(cqc, command, qubit_id, notify, false, notify, 0));
+    return send_cqc_cmd(cqc, command, qubit_id, notify, false, notify, 0);
 }
 
 /*
@@ -239,13 +238,11 @@ cqc_simple_cmd(cqc_lib *cqc,
  * remote_node      address of remote node (IPv4)
  * remote_port      port for classical control info
  */
-
-int
-cqc_send(cqc_lib *cqc,
-         uint16_t qubit_id,
-         uint16_t remote_app_id,
-         uint16_t remote_port,
-         uint32_t remote_node)
+int cqc_send(cqc_lib *cqc,
+             uint16_t qubit_id,
+             uint16_t remote_app_id,
+             uint16_t remote_port,
+             uint32_t remote_node)
 {
     int n, nt;
     commHeader commH;
@@ -268,11 +265,11 @@ cqc_send(cqc_lib *cqc,
     n = write(cqc->sockfd, &commH, CQC_COMM_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR writing to socket");
-        return(-1);
+        return CQC_LIB_ERR;
     }
     nt += n;
 
-    return(nt);
+    return nt;
 }
 
 /*
@@ -283,8 +280,7 @@ cqc_send(cqc_lib *cqc,
  * Arguments:
  * qubit_id    id to assign to this qubit once it is received
  */
-uint16_t
-cqc_recv(cqc_lib *cqc)
+int cqc_recv(cqc_lib *cqc, uint16_t *qubit_id)
 {
     int n;
     cqcHeader reply;
@@ -294,7 +290,7 @@ cqc_recv(cqc_lib *cqc)
     n = cqc_simple_cmd(cqc, CQC_CMD_RECV, 0, 0);
     if (n < 0) {
         perror("ERROR - Cannot send receive request");
-        return(-1);
+        return CQC_LIB_ERR;
     }
 
     /* Now read CQC Header from server response */
@@ -302,11 +298,11 @@ cqc_recv(cqc_lib *cqc)
     n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR - cannot get reply header");
-        return(-1);
+        return CQC_LIB_ERR;
     }
     if(reply.type != CQC_TP_RECV) {
         fprintf(stderr,"ERROR: Expected RECV");
-        return(-1);
+        return CQC_LIB_ERR;
     }
 
     /* Then read qubit id from notify header */
@@ -314,10 +310,11 @@ cqc_recv(cqc_lib *cqc)
     n = read(cqc->sockfd, &note, CQC_QUBIT_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR - cannot get measurement outcome");
-        return(-1);
+        return CQC_LIB_ERR;
     }
 
-    return(ntohs(note.qubit_id));
+    *qubit_id = ntohs(note.qubit_id);
+    return CQC_LIB_OK;
 }
 
 /*
@@ -330,8 +327,7 @@ cqc_recv(cqc_lib *cqc)
  * Arguments:
  * qubit_id    qubit to measure
  */
-int
-cqc_measure(cqc_lib *cqc, uint16_t qubit_id)
+int cqc_measure(cqc_lib *cqc, uint16_t qubit_id, uint8_t *meas_out)
 {
     int n;
     cqcHeader reply;
@@ -345,11 +341,11 @@ cqc_measure(cqc_lib *cqc, uint16_t qubit_id)
     n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR - cannot get reply header");
-        return(-1);
+        return CQC_LIB_ERR;
     }
     if(reply.type != CQC_TP_MEASOUT) {
         fprintf(stderr,"ERROR: Expected MEASOUT, got %u\n",reply.type);
-        return(-1);
+        return CQC_LIB_ERR;
     }
 
     /* Then read measurement outcome from notify header */
@@ -357,10 +353,11 @@ cqc_measure(cqc_lib *cqc, uint16_t qubit_id)
     n = read(cqc->sockfd, &note, CQC_MEASOUT_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR - cannot get measurement outcome");
-        return(-1);
+        return CQC_LIB_ERR;
     }
 
-    return(note.meas_out);
+    *meas_out = note.meas_out;
+    return CQC_LIB_OK;
 }
 
 /*
@@ -371,8 +368,7 @@ cqc_measure(cqc_lib *cqc, uint16_t qubit_id)
  * Arguments:
  * reps    number of replies to wait for
  */
-int
-cqc_wait_until_done(cqc_lib *cqc, unsigned int reps)
+int cqc_wait_until_done(cqc_lib *cqc, unsigned int reps)
 {
     int i, n;
     cqcHeader reply;
@@ -383,22 +379,23 @@ cqc_wait_until_done(cqc_lib *cqc, unsigned int reps)
         n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
         if (n < 0) {
             perror("ERROR - cannot get reply header");
-            return(-1);
+            return CQC_LIB_ERR;
         }
 
         /* Check whether an error occured */
         if(reply.type >= CQC_ERR_GENERAL) {
             cqc_error(reply.type);
-            return(-1);
+            return CQC_LIB_ERR;
         }
 
         /* Otherwise check whether it's done */
         if(reply.type != CQC_TP_DONE) {
             fprintf(stderr,"Unexpected reply of type %d\n",reply.type);
-            return(-1);
+            return CQC_LIB_ERR;
         }
     }
-    return(0);
+
+    return CQC_LIB_OK;
 }
 
 
@@ -408,8 +405,7 @@ cqc_wait_until_done(cqc_lib *cqc, unsigned int reps)
  * Wait until qubit creation is confirmed. Returns qubit id if successful, -1 otherwise.
  *
  */
-int
-cqc_wait_until_newok(cqc_lib *cqc)
+int cqc_wait_until_newok(cqc_lib *cqc, uint16_t *qubit_id)
 {
     int n;
     cqcHeader reply;
@@ -420,19 +416,19 @@ cqc_wait_until_newok(cqc_lib *cqc)
     n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR - cannot get reply header");
-        return(-1);
+        return CQC_LIB_ERR;
     }
 
     /* Check whether an error occured */
     if(reply.type >= CQC_ERR_GENERAL) {
         cqc_error(reply.type);
-        return(-1);
+        return CQC_LIB_ERR;
     }
 
     /* Otherwise check whether it's done */
     if(reply.type != CQC_TP_NEW_OK) {
         fprintf(stderr,"Unexpected reply of type %d, expected %d\n",reply.type, CQC_TP_NEW_OK);
-        return(-1);
+        return CQC_LIB_ERR;
     }
 
     /* Then read qubit id from notify header */
@@ -440,10 +436,11 @@ cqc_wait_until_newok(cqc_lib *cqc)
     n = read(cqc->sockfd, &note, CQC_QUBIT_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR - cannot get measurement outcome");
-        return(-1);
+        return CQC_LIB_ERR;
     }
 
-    return(ntohs(note.qubit_id));
+    *qubit_id = ntohs(note.qubit_id);
+    return CQC_LIB_OK;
 }
 
 /*
@@ -456,11 +453,10 @@ cqc_wait_until_newok(cqc_lib *cqc)
  *  qubit1      number of the first qubit
  *  qubit2      number of the second qubit
  */
-int
-cqc_twoqubit(cqc_lib *cqc,
-             uint8_t command,
-             uint16_t qubit1,
-             uint16_t qubit2)
+int cqc_twoqubit(cqc_lib *cqc,
+                 uint8_t command,
+                 uint16_t qubit1,
+                 uint16_t qubit2)
 {
     int n, nt;
     qubitHeader qubitH;
@@ -481,11 +477,30 @@ cqc_twoqubit(cqc_lib *cqc,
     n = write(cqc->sockfd, &qubitH, CQC_QUBIT_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR writing to socket");
-        return(-1);
+        return CQC_LIB_ERR;
     }
     nt += n;
 
-    return(nt);
+    return nt;
+}
+
+/*
+ * cqc_ntoh_epr_hdr
+ *
+ * Convert EPR header from network to host order.
+ */
+static void cqc_ntoh_epr_hdr(entanglementHeader *ent_info)
+{
+    ent_info->node_A = ntohl(ent_info->node_A);
+    ent_info->port_A = ntohs(ent_info->port_A);
+    ent_info->app_id_A = ntohs(ent_info->app_id_A);
+    ent_info->node_B = ntohl(ent_info->node_B);
+    ent_info->port_B = ntohs(ent_info->port_B);
+    ent_info->app_id_B = ntohs(ent_info->app_id_B);
+    ent_info->id_AB = ntohl(ent_info->id_AB);
+    ent_info->timestamp = be64toh(ent_info->timestamp);
+    ent_info->tog = be64toh(ent_info->tog);
+    ent_info->goodness = ntohs(ent_info->goodness);
 }
 
 /*
@@ -498,12 +513,12 @@ cqc_twoqubit(cqc_lib *cqc,
  * remote_node      address of remote node to receive from (IPv4)
  * remote_port      port for classical control info
  */
-int
-cqc_epr(cqc_lib *cqc,
-        uint16_t remote_app_id,
-        uint16_t remote_port,
-        uint32_t remote_node,
-        entanglementHeader *ent_info)
+int cqc_epr(cqc_lib *cqc,
+            uint16_t remote_app_id,
+            uint16_t remote_port,
+            uint32_t remote_node,
+            uint16_t *qubit_id,
+            entanglementHeader *ent_info)
 {
     int n, nt;
     commHeader commH;
@@ -528,7 +543,7 @@ cqc_epr(cqc_lib *cqc,
     n = write(cqc->sockfd, &commH, CQC_COMM_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR writing to socket");
-        return (-1);
+        return CQC_LIB_ERR;
     }
     nt += n;
 
@@ -537,11 +552,11 @@ cqc_epr(cqc_lib *cqc,
     n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR - cannot get reply header");
-        return (-1);
+        return CQC_LIB_ERR;
     }
     if (reply.type != CQC_TP_MEASOUT) {
         fprintf(stderr, "ERROR: Expected MEASOUT, got %u\n", reply.type);
-        return (-1);
+        return CQC_LIB_ERR;
     }
 
     /* Then read qubit id from notify header */
@@ -549,17 +564,20 @@ cqc_epr(cqc_lib *cqc,
     n = read(cqc->sockfd, &note, CQC_QUBIT_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR - cannot get measurement outcome");
-        return (-1);
+        return CQC_LIB_ERR;
     }
+    *qubit_id = ntohs(note.qubit_id);
 
     /* Read the entanglement header */
     memset(ent_info, 0x00, sizeof(*ent_info));
     n = read(cqc->sockfd, ent_info, CQC_ENT_INFO_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR - cannot get entanglement  info header");
+        return CQC_LIB_ERR;
     }
+    cqc_ntoh_epr_hdr(ent_info);
 
-    return (note.qubit_id);
+    return CQC_LIB_OK;
 }
 
 /*
@@ -568,9 +586,9 @@ cqc_epr(cqc_lib *cqc,
  * Request to receive EPR pair.
  *
  */
-int
-cqc_epr_recv(cqc_lib *cqc,
-             entanglementHeader * ent_info)
+int cqc_epr_recv(cqc_lib *cqc,
+                 uint16_t *qubit_id,
+                 entanglementHeader *ent_info)
 {
     int n, nt;
     cqcHeader reply;
@@ -585,7 +603,7 @@ cqc_epr_recv(cqc_lib *cqc,
                       CQC_COMM_HDR_LENGTH);
     if (nt < 0) {
         perror("ERROR - failed to send");
-        return (-1);
+        return CQC_LIB_ERR;
     }
 
     /* Now read CQC Header from server response */
@@ -593,11 +611,11 @@ cqc_epr_recv(cqc_lib *cqc,
     n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR - cannot get reply header");
-        return (-1);
+        return CQC_LIB_ERR;
     }
     if (reply.type != CQC_TP_MEASOUT) {
         fprintf(stderr, "ERROR: Expected MEASOUT, got %u\n", reply.type);
-        return (-1);
+        return CQC_LIB_ERR;
     }
 
     /* Then read qubit id from notify header */
@@ -605,15 +623,18 @@ cqc_epr_recv(cqc_lib *cqc,
     n = read(cqc->sockfd, &note, CQC_QUBIT_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR - cannot get measurement outcome");
-        return (-1);
+        return CQC_LIB_ERR;
     }
+    *qubit_id = ntohs(note.qubit_id);
 
     /* Read the entanglement header */
     memset(ent_info, 0x00, sizeof(*ent_info));
     n = read(cqc->sockfd, ent_info, CQC_ENT_INFO_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR - cannot get entanglement  info header");
+        return CQC_LIB_ERR;
     }
+    cqc_ntoh_epr_hdr(ent_info);
 
-    return (note.qubit_id);
+    return CQC_LIB_OK;
 }

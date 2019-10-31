@@ -21,7 +21,7 @@ make_plus(cqc_lib *cqc)
         fprintf(stderr,"Qubit creation failed.\n");
         return(-1);
     }
-    qubit = cqc_wait_until_newok(cqc);
+    cqc_wait_until_newok(cqc, &qubit);
     if(qubit < 0) {
         fprintf(stderr,"ERROR: Test failed.\n");
         return(-1);
