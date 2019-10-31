@@ -15,7 +15,7 @@
  * Arguments:
  * app_id    ID to use for this application
  */
-cqc_ctx *cqc_init(int app_id)
+cqc_ctx *cqc_init(uint16_t app_id)
 {
     /* Initialize CQC Data structure */
     cqc_ctx *cqc = (cqc_ctx *)malloc(sizeof(cqc_ctx));

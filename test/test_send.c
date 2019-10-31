@@ -3,18 +3,10 @@
 #include <netdb.h>
 
 #include "cqc.h"
+#include "test.h"
 
 int main(int argc, char *argv[]) {
 
-    uint16_t portno;
-    char *hostname;
-    uint16_t remotePort;
-    char *remoteHost;
-    struct in_addr remoteNode;
-    cqc_lib *cqc;
-    int app_id;
-    struct hostent *server;
-    uint16_t qubit;
 
     /* Retrieve arguments from command line */
     if (argc < 5) {
@@ -22,32 +14,31 @@ int main(int argc, char *argv[]) {
                 argv[0]);
         exit(0);
     }
-    hostname = argv[1];
-    portno = atoi(argv[2]);
-    remoteHost = argv[3];
-    remotePort = atoi(argv[4]);
+    char *hostname = argv[1];
+    uint16_t portno = atoi(argv[2]);
+    char *remoteHost = argv[3];
+    uint16_t remotePort = atoi(argv[4]);
 
     /* Lookup remote host */
-    server = gethostbyname(remoteHost);
-    if (server == NULL) {
-        fprintf(stderr,"ERROR, no such host\n");
-        return(-1);
-    }
+    struct hostent *server = gethostbyname(remoteHost);
+    assert(server != NULL);
 
     /* In this example, we are simply application 10 */
-    app_id = 10;
+    uint16_t app_id = 10;
 
     /* In this example, we will not check for errors. All functions return -1
      * on failure */
-    cqc = cqc_init(app_id);
-    cqc_connect(cqc, hostname, portno);
+    cqc_ctx *cqc = cqc_init(app_id);
+    assert(cqc != NULL);
+    ASSERT_CQC_CALL(cqc_connect(cqc, hostname, portno));
 
-    cqc_simple_cmd(cqc, CQC_CMD_NEW, 0, 0);
-    cqc_wait_until_newok(cqc, &qubit);
+    uint16_t qubit;
+    ASSERT_CQC_CALL(cqc_simple_cmd(cqc, CQC_CMD_NEW, 0, false));
+    ASSERT_CQC_CALL(cqc_wait_until_newok(cqc, &qubit));
 
-    remoteNode.s_addr = ntohl(*((uint32_t *)server->h_addr_list[0]));
-    cqc_send(cqc, qubit, app_id, remotePort, remoteNode.s_addr);
-    cqc_wait_until_done(cqc, 1);
+    uint32_t remote_node = ntohl(*((uint32_t *)server->h_addr_list[0]));
+    ASSERT_CQC_CALL(cqc_send(cqc, qubit, app_id, remotePort, remote_node));
+    ASSERT_CQC_CALL(cqc_wait_until_done(cqc, 1));
 
     return 0;
 }

@@ -203,19 +203,19 @@ typedef struct
 enum cqc_lib_rc
 {
     CQC_LIB_OK = 0,
-    CQC_LIB_ERR = 1,
+    CQC_LIB_ERR = -1,
 };
 
 /* Definitions to access and manage CQC */
 typedef struct
 {
     int sockfd;                 /* Socket handling to CQC Backend */
-    int app_id;                 /* Application details */
+    uint16_t app_id;            /* Application details */
 } cqc_ctx;
 
 /* CQC Function Definitions */
 
-cqc_ctx *cqc_init(int app_id);
+cqc_ctx *cqc_init(uint16_t app_id);
 int cqc_connect(cqc_ctx *cqc, char *hostname, int portno);
 void cqc_close(cqc_ctx *cqc);
 void cqc_destroy(cqc_ctx *cqc);
