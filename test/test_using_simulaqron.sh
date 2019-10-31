@@ -4,15 +4,10 @@ set -eu
 
 # Install SimulaQron
 if [ -z "$(which simulaqron)" ]; then
-    echo "To run these tests you need simulaqron installed.\nYou can install simulaqron by 'pip3 install simulaqron'."
+    echo "To run these tests you need simulaqron installed."
+    echo "You can install simulaqron by 'pip3 install simulaqron'."
     exit 1
 fi
-# read -p "SimulaQron will be installed using pip, do you wish to continue? (y/n)" yn
-# if [ "$yn" == "y" ]; then
-#     pip3 install simulaqron
-# else
-#     exit
-# fi
 
 # Clean up leftovers
 simulaqron stop
@@ -36,10 +31,10 @@ make all
 
 # Start the tests
 echo -e "\e[1;32m[$(date +%H:%M:%S)] Run Tests\e[0m"
-./qubit localhost 8803
-./send localhost 8803 localhost 8804
-./recv localhost 8804
-./gates localhost 8803
+bin/qubit localhost 8803
+bin/send localhost 8803 localhost 8804
+bin/recv localhost 8804
+bin/gates localhost 8803
 
 echo -e "\e[1;32m[$(date +%H:%M:%S)] Testing Complete\e[0m"
 simulaqron stop

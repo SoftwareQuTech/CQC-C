@@ -154,6 +154,13 @@ typedef struct
     uint8_t options;            /* Options when executing the factory */
 } __attribute__((__packed__)) factoryHeader;
 
+/* Additional header for assigning measurement outcomes to ref IDs. */
+#define CQC_ASSIGN_HDR_LENGTH 4
+typedef struct
+{
+    uint32_t ref_id;
+} __attribute__((__packed__)) assignHeader;
+
 /* Additional header used to send the outcome of a measurement. */
 #define CQC_MEASOUT_HDR_LENGTH  1
 typedef struct

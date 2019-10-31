@@ -1,11 +1,11 @@
 CC=gcc
 CFLAGS=-I../ -Wall -Werror -std=gnu11
 
-DEPS = ../cqc.h
-CORE = ../cqc.c
-
 SRC_DIR = ./src
 BIN_DIR = ./bin
+
+DEPS = ../cqc.h $(SRC_DIR)/test.h
+CORE = ../cqc.c
 
 .PHONY: all clean
 .DEFAULT: all
