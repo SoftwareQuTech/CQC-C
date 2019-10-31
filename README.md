@@ -9,10 +9,9 @@ This is the C library for accessing the CQC backend. The packet format is
 specified in cqc.h. Evidently, you will need a C compiler to compile and run
 these files, as well as a unix socket library (winsock is not supported).
 
-To build and test the library, proceed as follows:
+To build and test the library, run:
 ```sh
-cd test
-./test_using_simulaqron.sh
+test/test_using_simulaqron.sh
 ```
 
 You should first run the test mention above in order to verify the install.
