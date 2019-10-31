@@ -10,9 +10,11 @@ specified in cqc.h. Evidently, you will need a C compiler to compile and run
 these files, as well as a unix socket library (winsock is not supported).
 
 To build and test the library, proceed as follows:
-- `make` - compile the library and tests
-- `test/run_test.sh` - spin up the SimulaQron nodes and run the tests
+```sh
+cd test
+./test_using_simulaqron.sh
+```
 
-You should first run `test/run_test.sh` in order to verify the install. This
-will check the gates using tomography. This requires a small amount of time, so
-be patient :-)
+You should first run the test mention above in order to verify the install.
+This will check the gates using tomography. This requires a small amount of
+time, so be patient :-)
