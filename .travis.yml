@@ -25,4 +25,5 @@ install:
 script:
 - pip3 install setuptools wheel
 - pip3 install simulaqron
+- cd test
 - ./test_using_simulaqron.sh
