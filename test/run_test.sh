@@ -22,10 +22,10 @@ make all
 
 # Start the tests
 echo -e "\e[1;32m[$(date +%H:%M:%S)] Run Tests\e[0m"
-./qubit localhost 8803
-./send localhost 8803 localhost 8804
-./recv localhost 8804
-./gates localhost 8803
+bin/qubit localhost 8803
+bin/send localhost 8803 localhost 8804
+bin/recv localhost 8804
+bin/gates localhost 8803
 
 echo -e "\e[1;32m[$(date +%H:%M:%S)] Testing Complete\e[0m"
 $simulaqron_path/cli/SimulaQron stop
