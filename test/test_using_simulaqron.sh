@@ -14,11 +14,10 @@ simulaqron stop
 simulaqron reset -f
 
 # Set the network file to be the one in this folder
-this_file_path=$0
-this_folder_path=$(dirname "$(readlink -f ${this_file_path})")
+relative_path=$(dirname "$0")
+this_folder_path=$(cd $relative_path 2> /dev/null && pwd -P)
 network_file="${this_folder_path}/test_network.json"
 simulaqron set network-config-file $network_file
-# simulaqron set log-level 0
 
 # Start the Virtual and CQC Nodes
 echo -e "\e[1;32m[$(date +%H:%M:%S)] Start CQC Nodes\e[0m"
