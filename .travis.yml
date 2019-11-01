@@ -29,6 +29,7 @@ script:
   - pip3 install simulaqron
   - cd test
   - "./test_using_simulaqron.sh"
+  - cd ..
 before_deploy:
   - cd docs
   - make build
