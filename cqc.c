@@ -9,7 +9,7 @@
 /*
  * cqc_init
  *
- * Initialize the CQC Backend.
+ * Create and return a cqc_ctx handle.
  *
  * Arguments:
  * app_id    ID to use for this application
@@ -27,11 +27,12 @@ cqc_ctx *cqc_init(uint16_t app_id)
 /*
  * cqc_connect
  *
- * Connect to CQC Backend (if necessary).
+ * Connect to CQC backend.
  *
  * Arguments:
- * hostname     hostname to connect to
- * portno       port number to connect to
+ *
+ * hostname    hostname of the CQC backend
+ * portno      port of the CQC backend
  */
 int cqc_connect(cqc_ctx *cqc, char *hostname, int portno)
 {
@@ -73,7 +74,7 @@ int cqc_connect(cqc_ctx *cqc, char *hostname, int portno)
 /*
  * cqc_close
  *
- * Close the connection to the back-end.
+ * Disconnect from the backend.
  */
 void cqc_close(cqc_ctx *cqc)
 {
@@ -83,18 +84,14 @@ void cqc_close(cqc_ctx *cqc)
 /*
  * cqc_destroy
  *
- * Free allocated memory.
+ * Free the resources allocated for this cqc_ctx handle (including itself).
  */
 void cqc_destroy(cqc_ctx *cqc)
 {
     free(cqc);
 }
 
-/*
- * cqc_error
- *
- * Print the appropriate error message for the error code received.
- */
+/* Utility function to provide string messages for CQC errors. */
 static void cqc_error(uint8_t type)
 {
     switch(type) {
@@ -125,9 +122,13 @@ static void cqc_error(uint8_t type)
 /*
  * send_cqc_header
  *
- * Prepare and sends CQC header
+ * Prepare and send the top-level CQC header.
+ *
+ * Arguments:
+ * type    the message type
+ * len     length of subsequent headers
  */
-static int send_cqc_header(cqc_ctx *cqc, uint8_t type, uint32_t len)
+int send_cqc_header(cqc_ctx *cqc, uint8_t type, uint32_t len)
 {
     cqcHeader cqcH;
     cqcH.version = CQC_VERSION;
@@ -148,21 +149,23 @@ static int send_cqc_header(cqc_ctx *cqc, uint8_t type, uint32_t len)
 /*
  * send_cqc_cmd
  *
- * Build and send the CQC header and the command header
+ * Build and send the CQC header and the command header.
  *
  * Arguments:
  * command     command identifier to be sent
  * qubit_id    identifier of qubit on which to perform this command
  * notify      whether to request a DONE upon completion
+ * action      set if there are more actions to execute when done
+ * block       block other instructions until this command is done
  * length      length of any headers that are to follow
  */
-static int send_cqc_cmd(cqc_ctx *cqc,
-                        uint8_t command,
-                        uint16_t qubit_id,
-                        bool notify,
-                        bool action,
-                        bool block,
-                        uint32_t length)
+int send_cqc_cmd(cqc_ctx *cqc,
+                 uint8_t command,
+                 uint16_t qubit_id,
+                 bool notify,
+                 bool action,
+                 bool block,
+                 uint32_t length)
 {
     /* Send CQC message indicating a command */
     int rc = send_cqc_header(cqc, CQC_TP_COMMAND, CQC_CMD_HDR_LENGTH + length);
@@ -199,7 +202,7 @@ static int send_cqc_cmd(cqc_ctx *cqc,
 /*
  * cqc_hello
  *
- * Sends a HELLO message to the CQC Backend.
+ * Sends a HELLO message to the CQC backend.
  */
 int cqc_hello(cqc_ctx *cqc)
 {
@@ -209,12 +212,12 @@ int cqc_hello(cqc_ctx *cqc)
 /*
  * cqc_simple_cmd
  *
- * Executes a simple CQC command (not requiring any additional details)
+ * Executes a simple CQC command (not requiring any additional details).
  *
  * Arguments:
  * command     command identifier to be sent
  * qubit_id    identifier of qubit on which to perform this command
- * notify      whether to request a DONE upon completion (0 = no, 1 = yes)
+ * notify      whether to request a DONE upon completion
  */
 int cqc_simple_cmd(cqc_ctx *cqc,
                    uint8_t command,
@@ -227,7 +230,7 @@ int cqc_simple_cmd(cqc_ctx *cqc,
 /*
  * cqc_send
  *
- * Request the qubit to send to remote node.
+ * Send a qubit to a remote node.
  *
  * Arguments:
  * qubit_id         qubit to send
@@ -273,10 +276,10 @@ int cqc_send(cqc_ctx *cqc,
 /*
  * cqc_recv
  *
- * Request to receive a qubit.
+ * Receive a qubit.
  *
  * Arguments:
- * qubit_id    id to assign to this qubit once it is received
+ * qubit_id    (OUT) ID assigned to the received qubit
  */
 int cqc_recv(cqc_ctx *cqc, uint16_t *qubit_id)
 {
@@ -318,12 +321,11 @@ int cqc_recv(cqc_ctx *cqc, uint16_t *qubit_id)
 /*
  * cqc_measure
  *
- * Request to measure a specific qubit. This will block until the reply is
- * received. (Non blocking measure requests can be performed using
- * cqc_simple_cmd)
+ * Measure a specific qubit. This will block until the reply is received.
  *
  * Arguments:
  * qubit_id    qubit to measure
+ * meas_out    (OUT) measurement outcome
  */
 int cqc_measure(cqc_ctx *cqc, uint16_t qubit_id, uint8_t *meas_out)
 {
@@ -376,7 +378,7 @@ int cqc_measure(cqc_ctx *cqc, uint16_t qubit_id, uint8_t *meas_out)
 /*
  * cqc_wait_until_done
  *
- * Read a certain number of DONE commands before proceeding.
+ * Receive certain number of DONE commands before proceeding.
  *
  * Arguments:
  * reps    number of replies to wait for
@@ -411,12 +413,13 @@ int cqc_wait_until_done(cqc_ctx *cqc, unsigned int reps)
     return CQC_LIB_OK;
 }
 
-
 /*
  * cqc_wait_until_newok
  *
- * Wait until qubit creation is confirmed. Returns qubit id if successful, -1 otherwise.
+ * Wait until qubit creation is confirmed.
  *
+ * Arguments:
+ * qubit_id    (OUT) ID of created qubit
  */
 int cqc_wait_until_newok(cqc_ctx *cqc, uint16_t *qubit_id)
 {
@@ -462,9 +465,9 @@ int cqc_wait_until_newok(cqc_ctx *cqc, uint16_t *qubit_id)
  *  Execute local two qubit gate.
  *
  *  Arguments:
- *  command     command id to execute
- *  qubit1      number of the first qubit
- *  qubit2      number of the second qubit
+ *  command    command id to execute
+ *  qubit1     number of the first qubit
+ *  qubit2     number of the second qubit
  */
 int cqc_twoqubit(cqc_ctx *cqc,
                  uint8_t command,
@@ -503,7 +506,6 @@ int cqc_twoqubit(cqc_ctx *cqc,
  *
  * Convert 64-bit value to host order. Linux needs endian.h, but cannot use
  * endian.h on a mac so this is the portable solution.
- *
  */
 
 static uint64_t cqc_ntohll(const uint64_t input)
@@ -544,12 +546,14 @@ static void cqc_ntoh_epr_hdr(entanglementHeader *ent_info)
 /*
  * cqc_epr
  *
- * Request to generate EPR pair with remote node.
+ * Generate EPR pair with remote node.
  *
  * Arguments:
- * remote_app_id    app id on the remote node to send to
+ * remote_app_id    app id on the remote node
  * remote_node      address of remote node to receive from (IPv4)
  * remote_port      port for classical control info
+ * qubit_id         (OUT) ID of local qubit of the EPR pair
+ * ent_info         (OUT) etanglement information
  */
 int cqc_epr(cqc_ctx *cqc,
             uint16_t remote_app_id,
@@ -622,8 +626,10 @@ int cqc_epr(cqc_ctx *cqc,
 /*
  * cqc_epr_recv
  *
- * Request to receive EPR pair.
+ * Receive EPR pair.
  *
+ * qubit_id         (OUT) ID of local qubit of the EPR pair
+ * ent_info         (OUT) etanglement information
  */
 int cqc_epr_recv(cqc_ctx *cqc,
                  uint16_t *qubit_id,

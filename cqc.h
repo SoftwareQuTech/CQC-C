@@ -227,8 +227,16 @@ int cqc_connect(cqc_ctx *cqc, char *hostname, int portno);
 void cqc_close(cqc_ctx *cqc);
 void cqc_destroy(cqc_ctx *cqc);
 
-int cqc_hello(cqc_ctx *cqc);
+int send_cqc_header(cqc_ctx *cqc, uint8_t type, uint32_t len);
+int send_cqc_cmd(cqc_ctx *cqc,
+                 uint8_t command,
+                 uint16_t qubit_id,
+                 bool notify,
+                 bool action,
+                 bool block,
+                 uint32_t length);
 
+int cqc_hello(cqc_ctx *cqc);
 int cqc_simple_cmd(cqc_ctx *cqc,
                    uint8_t command,
                    uint16_t qubit_id,
