@@ -35,23 +35,21 @@ cqc_ctx *cqc_init(uint16_t app_id)
  */
 int cqc_connect(cqc_ctx *cqc, char *hostname, int portno)
 {
-    int sock;
-    struct sockaddr_in serv_addr;
-    struct hostent *server;
-
     /* Set up connection details */
-    sock = socket(AF_INET, SOCK_STREAM, 0);
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
         perror("ERROR opening socket");
         return CQC_LIB_ERR;
     }
 
+    struct hostent *server;
     server = gethostbyname(hostname);
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
         return CQC_LIB_ERR;
     }
 
+    struct sockaddr_in serv_addr;
     memset((char *) &serv_addr, 0x00, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     memmove((char *)&serv_addr.sin_addr.s_addr,
@@ -280,18 +278,15 @@ int cqc_send(cqc_ctx *cqc,
  */
 int cqc_recv(cqc_ctx *cqc, uint16_t *qubit_id)
 {
-    int n;
-    cqcHeader reply;
-    qubitHeader note;
-
     /* Send out request to receive a qubit */
-    n = cqc_simple_cmd(cqc, CQC_CMD_RECV, 0, 0);
+    int n = cqc_simple_cmd(cqc, CQC_CMD_RECV, 0, 0);
     if (n < 0) {
         perror("ERROR - Cannot send receive request");
         return CQC_LIB_ERR;
     }
 
     /* Now read CQC Header from server response */
+    cqcHeader reply;
     memset(&reply, 0x00, sizeof(reply));
     n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
     if (n < 0) {
@@ -304,6 +299,7 @@ int cqc_recv(cqc_ctx *cqc, uint16_t *qubit_id)
     }
 
     /* Then read qubit id from notify header */
+    qubitHeader note;
     memset(&note, 0x00, sizeof(note));
     n = read(cqc->sockfd, &note, CQC_QUBIT_HDR_LENGTH);
     if (n < 0) {
@@ -327,29 +323,30 @@ int cqc_recv(cqc_ctx *cqc, uint16_t *qubit_id)
  */
 int cqc_measure(cqc_ctx *cqc, uint16_t qubit_id, uint8_t *meas_out)
 {
-    int n;
-    assignHeader assign;
-    cqcHeader reply;
-    measoutHeader note;
-
     /* Send command to perform measurement */
-    send_cqc_cmd(cqc,
-                 CQC_CMD_MEASURE,
-                 qubit_id,
-                 false,
-                 false,
-                 false,
-                 CQC_ASSIGN_HDR_LENGTH);
+    int rc = send_cqc_cmd(cqc,
+                          CQC_CMD_MEASURE,
+                          qubit_id,
+                          false,
+                          false,
+                          false,
+                          CQC_ASSIGN_HDR_LENGTH);
+    if (rc != CQC_LIB_OK) {
+        fprintf(stderr, "Failed to send CQC command.\n");
+        return CQC_LIB_ERR;
+    }
 
     /* Send the assign header */
+    assignHeader assign;
     memset(&assign, 0x00, sizeof(assign));
-    n = write(cqc->sockfd, &assign, CQC_ASSIGN_HDR_LENGTH);
+    int n = write(cqc->sockfd, &assign, CQC_ASSIGN_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR writing to socket");
         return CQC_LIB_ERR;
     }
 
     /* Now read CQC Header from server response */
+    cqcHeader reply;
     memset(&reply, 0x00, sizeof(reply));
     n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
     if (n < 0) {
@@ -362,6 +359,7 @@ int cqc_measure(cqc_ctx *cqc, uint16_t qubit_id, uint8_t *meas_out)
     }
 
     /* Then read measurement outcome from notify header */
+    measoutHeader note;
     memset(&note, 0x00, sizeof(note));
     n = read(cqc->sockfd, &note, CQC_MEASOUT_HDR_LENGTH);
     if (n < 0) {
@@ -383,13 +381,11 @@ int cqc_measure(cqc_ctx *cqc, uint16_t qubit_id, uint8_t *meas_out)
  */
 int cqc_wait_until_done(cqc_ctx *cqc, unsigned int reps)
 {
-    int i, n;
-    cqcHeader reply;
-
-    for(i = 0; i < reps; i++) {
+    for(int _ = 0; _ < reps; ++_) {
         /* Now read CQC Header from server response */
+        cqcHeader reply;
         memset(&reply, 0x00, sizeof(reply));
-        n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
+        int n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
         if (n < 0) {
             perror("ERROR - cannot get reply header");
             return CQC_LIB_ERR;
@@ -420,13 +416,10 @@ int cqc_wait_until_done(cqc_ctx *cqc, unsigned int reps)
  */
 int cqc_wait_until_newok(cqc_ctx *cqc, uint16_t *qubit_id)
 {
-    int n;
-    cqcHeader reply;
-    qubitHeader note;
-
     /* Now read CQC Header from server response */
+    cqcHeader reply;
     memset(&reply, 0x00, sizeof(reply));
-    n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
+    int n = read(cqc->sockfd, &reply, CQC_HDR_LENGTH);
     if (n < 0) {
         perror("ERROR - cannot get reply header");
         return CQC_LIB_ERR;
@@ -446,6 +439,7 @@ int cqc_wait_until_newok(cqc_ctx *cqc, uint16_t *qubit_id)
     }
 
     /* Then read qubit id from notify header */
+    qubitHeader note;
     memset(&note, 0x00, sizeof(note));
     n = read(cqc->sockfd, &note, CQC_QUBIT_HDR_LENGTH);
     if (n < 0) {
