@@ -5,6 +5,8 @@ this library for SimulaQron, checkout the repo
 [https://github.com/SoftwareQuTech/SimulaQron]() and the docs
 [https://softwarequtech.github.io/SimulaQron/html/index.html]().
 
+The documentation for this library can be found at https://softwarequtech.github.io/CQC-C/.
+
 This is the C library for accessing the CQC backend. The packet format is
 specified in cqc.h. Evidently, you will need a C compiler to compile and run
 these files, as well as a unix socket library (winsock is not supported).
