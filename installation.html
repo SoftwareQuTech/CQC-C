@@ -37,7 +37,7 @@
   <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Installation</a><ul>
-<li><a class="reference internal" href="#install-from-source">Install from source</a></li>
+<li><a class="reference internal" href="#id1">Installation</a></li>
 </ul>
 </li>
 </ul>
@@ -80,17 +80,15 @@
 <p>This library can be used to write applications which send CQC messages to a backend which can listen to these messages.
 This library does not come with a backend but you can use the simulator <a class="reference external" href="http://www.simulaqron.org/">SimulaQron</a> as a backend.</p>
 </div>
-<div class="section" id="install-from-source">
-<h2>Install from source<a class="headerlink" href="#install-from-source" title="Permalink to this headline">¶</a></h2>
-<p>To build from source (including tests), clone the <a class="reference external" href="https://github.com/SoftwareQuTech/CQC-C">repo</a>, cd into the folder and do:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nb">test</span>
-make all
+<div class="section" id="id1">
+<h2>Installation<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>The library is available by cloning <a class="reference external" href="https://github.com/SoftwareQuTech/CQC-C">repo</a>.</p>
+<p>The library is available in two files <cite>cqc.h</cite> and <cite>cqc.c</cite> and it is up to you how to integrate them into your build system.</p>
+<p>To verify that the library is able to compile and run on your machine you can run the tests included in this repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>test/test_using_simulaqron.sh
 </pre></div>
 </div>
-<p>To rum the tests, do:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./test_using_simulaqron.sh
-</pre></div>
-</div>
+<p>This will start SimulaQron and build and run the tests.</p>
 </div>
 </div>
 
