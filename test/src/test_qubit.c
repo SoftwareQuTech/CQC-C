@@ -33,7 +33,10 @@ int main(int argc, char *argv[]) {
 
     uint8_t outcome;
     ASSERT_CQC_CALL(cqc_measure(cqc, qubit, &outcome));
-    printf("Outcome: %d\n",outcome);
+    printf("qubit.c :: outcome: %d\n",outcome);
+
+    cqc_close(cqc);
+    cqc_destroy(cqc);
 
     return 0;
 }

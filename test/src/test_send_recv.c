@@ -28,6 +28,11 @@ void test_send(uint16_t app_id,
 
     ASSERT_CQC_CALL(cqc_send(cqc, qubit, app_id, recv_port, remote_node));
     ASSERT_CQC_CALL(cqc_wait_until_done(cqc, 1));
+
+    printf("send_recv.c :: sent qubit %d\n", qubit);
+
+    cqc_close(cqc);
+    cqc_destroy(cqc);
 }
 
 void test_recv(uint16_t app_id, char *recv_host, uint16_t recv_port)
@@ -41,7 +46,10 @@ void test_recv(uint16_t app_id, char *recv_host, uint16_t recv_port)
     uint16_t qubit;
     ASSERT_CQC_CALL(cqc_recv(cqc, &qubit));
 
-    printf("Received qubit %d\n", qubit);
+    printf("send_recv.c :: received qubit %d\n", qubit);
+
+    cqc_close(cqc);
+    cqc_destroy(cqc);
 }
 
 int main(int argc, char *argv[]) {
