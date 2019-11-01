@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Check flags
+CI=""
+for ARG in "$@"
+do
+    if [ "$ARG" = "-ci" ]; then
+        CI="true"
+    fi
+done
+
 set -eu
 
 # Install SimulaQron
@@ -36,7 +45,10 @@ echo -e "\e[1;32m[$(date +%H:%M:%S)] Run Tests\e[0m"
 bin/qubit localhost 8803
 bin/send_recv localhost 8803 localhost 8804
 bin/epr localhost 8803 localhost 8804
-bin/gates localhost 8803
+# Don't do the probabilistic tests in the CI
+if [ -z "$CI" ]; then
+    bin/gates localhost 8803
+fi
 
 echo -e "\e[1;32m[$(date +%H:%M:%S)] Testing Complete\e[0m"
 simulaqron stop
