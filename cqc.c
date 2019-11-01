@@ -357,7 +357,7 @@ int cqc_measure(cqc_ctx *cqc, uint16_t qubit_id, uint8_t *meas_out)
         return CQC_LIB_ERR;
     }
     if(reply.type != CQC_TP_MEASOUT) {
-        fprintf(stderr,"ERROR: Expected MEASOUT, got %u\n",reply.type);
+        fprintf(stderr,"ERROR: Expected MEASOUT, got %u\n", reply.type);
         return CQC_LIB_ERR;
     }
 
@@ -403,7 +403,7 @@ int cqc_wait_until_done(cqc_ctx *cqc, unsigned int reps)
 
         /* Otherwise check whether it's done */
         if(reply.type != CQC_TP_DONE) {
-            fprintf(stderr,"Unexpected reply of type %d\n",reply.type);
+            fprintf(stderr,"Unexpected reply of type %d\n", reply.type);
             return CQC_LIB_ERR;
         }
     }
@@ -440,7 +440,8 @@ int cqc_wait_until_newok(cqc_ctx *cqc, uint16_t *qubit_id)
 
     /* Otherwise check whether it's done */
     if(reply.type != CQC_TP_NEW_OK) {
-        fprintf(stderr,"Unexpected reply of type %d, expected %d\n",reply.type, CQC_TP_NEW_OK);
+        fprintf(stderr,"Unexpected reply of type %d, expected %d\n",
+                reply.type, CQC_TP_NEW_OK);
         return CQC_LIB_ERR;
     }
 
@@ -561,7 +562,7 @@ int cqc_epr(cqc_ctx *cqc,
     int rc = send_cqc_cmd(cqc,
                           CQC_CMD_EPR,
                           0,
-                          true,
+                          false,
                           false,
                           true,
                           CQC_COMM_HDR_LENGTH);
@@ -592,8 +593,8 @@ int cqc_epr(cqc_ctx *cqc,
         perror("ERROR - cannot get reply header");
         return CQC_LIB_ERR;
     }
-    if (reply.type != CQC_TP_MEASOUT) {
-        fprintf(stderr, "ERROR: Expected MEASOUT, got %u\n", reply.type);
+    if (reply.type != CQC_TP_EPR_OK) {
+        fprintf(stderr, "ERROR: Expected EPR_OK, got %u\n", reply.type);
         return CQC_LIB_ERR;
     }
 
@@ -632,10 +633,10 @@ int cqc_epr_recv(cqc_ctx *cqc,
     int rc = send_cqc_cmd(cqc,
                           CQC_CMD_EPR_RECV,
                           0,
-                          true,
+                          false,
                           false,
                           true,
-                          CQC_COMM_HDR_LENGTH);
+                          0);
 
     if (rc != CQC_LIB_OK) {
         fprintf(stderr, "Failed to send CQC command.\n");
@@ -650,8 +651,8 @@ int cqc_epr_recv(cqc_ctx *cqc,
         perror("ERROR - cannot get reply header");
         return CQC_LIB_ERR;
     }
-    if (reply.type != CQC_TP_MEASOUT) {
-        fprintf(stderr, "ERROR: Expected MEASOUT, got %u\n", reply.type);
+    if (reply.type != CQC_TP_EPR_OK) {
+        fprintf(stderr, "ERROR: Expected EPR_OK, got %u\n", reply.type);
         return CQC_LIB_ERR;
     }
 

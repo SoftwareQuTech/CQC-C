@@ -35,6 +35,7 @@ sleep 5
 echo -e "\e[1;32m[$(date +%H:%M:%S)] Run Tests\e[0m"
 bin/qubit localhost 8803
 bin/send_recv localhost 8803 localhost 8804
+bin/epr localhost 8803 localhost 8804
 bin/gates localhost 8803
 
 echo -e "\e[1;32m[$(date +%H:%M:%S)] Testing Complete\e[0m"
