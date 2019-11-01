@@ -1,48 +1,48 @@
 language: c
 only:
-- master
-- develop
+  - master
+  - develop
 matrix:
   include:
-  - name: linux gcc 7
-    os: linux
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        packages:
-        - g++-7
-    env:
-    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7 && sudo apt-get -y install python3 python3-pip"
-    - BUILD=True
-  - name: osx gcc 8
-    os: osx
-    osx_image: xcode10.2
-    env:
-    - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+    - name: linux gcc 7
+      os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-7
+      env:
+      - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7 && sudo apt-get -y install python3 python3-pip"
+      - BUILD=True
+    - name: osx gcc 8
+      os: osx
+      osx_image: xcode10.2
+      env:
+      - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
 before_install:
-- eval "${MATRIX_EVAL}"
+  - eval "${MATRIX_EVAL}"
 install:
-- make -C test all
+  - make -C test all
 script:
-- pip3 install setuptools wheel
-- pip3 install simulaqron
-- cd test
-- "./test_using_simulaqron.sh"
+  - pip3 install setuptools wheel
+  - pip3 install simulaqron
+  - cd test
+  - "./test_using_simulaqron.sh"
 before_deploy:
-- cd docs
-- make build
-- cd ..
+  - cd docs
+  - make build
+  - cd ..
 deploy:
-- provider: pages
-  skip_cleanup: true
-  github_token: "$GITHUB_TOKEN"
-  keep_history: true
-  committer_from_gh: true
-  local_dir: docs/build/html
-  on:
-    branch: master
-    condition: "$BUILD = True"
+  - provider: pages
+    skip_cleanup: true
+    github_token: "$GITHUB_TOKEN"
+    keep_history: true
+    committer_from_gh: true
+    local_dir: docs/build/html
+    on:
+      branch: master
+      condition: "$BUILD = True"
 env:
   global:
     secure: xLQRkflrP4nPeWzGeAT+zmiI3PS+611gfdWHs4RGTqnRzYvuIw9irBCKtcC2jpnMVAwp/ArrmwXhKSWj4naUAb5TFi831KxOY0H0CJ/rK7A8rAp1yAvDAbNTqTVHEeQh8zH/h2/zXn/7OfIm3kEwzrxSn28xAQJqtjpKZ6ndfVCy7clrgy/lTgJSQPWnqkmiY6Max/UJHXXDJ4Yt+zMhspMCQqfo6vM6nluqovMc9vbFNe5NoUQC/wtQnb4naFSD37+Xxb4512zdiMVogigxvMxB+/wJs26VD3BdyOgUtR2NUnHhgGHuWWKT+XngEdajeQnADKLit1KCflJZohK2zbZ6rBfpUVKB3UalRXxbrXikX+CZv8GXNqATXTIa4X0J6QSR8DbEDl/F3nY6/ChW8aKdtEzVxfJlEw7LwyFzJjM404TeSSQoedJG7qCaMQ4Chu4MzSrpw4x2DdwwjHVjNVXYmMC11TEm97LMDS7jVozIW4+JcQB5NEHCZSdI69jiiV/gVCFKk7X3bi6ujrmjxN2URosYslguAAAgzWDlQ6SLjyRy/+JJSTjV+8oim3UEVJo4tMX/VZCWZicugfjbub61YxV4be/US/EQMefUanlotsINblJCw4vBEWj3QYyENVB5Cm2Uu3HLrnmLVN+ZIEqq+/8joIQ7nCGfODq8UBQ=
