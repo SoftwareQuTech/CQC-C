@@ -19,5 +19,5 @@ all: $(ALL)
 clean:
 	rm -f $(ALL)
 
-$(BIN_DIR)/%: $(SRC_DIR)/test_%.c $(CORE) $(DEPS)
+$(BIN_DIR)/%: $(SRC_DIR)/%.c $(CORE) $(DEPS)
 	$(CC) $(CFLAGS) -o $@ $< $(CORE) $(LIBS)
