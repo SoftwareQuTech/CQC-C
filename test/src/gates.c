@@ -176,7 +176,6 @@ uint16_t make_k(cqc_ctx *cqc)
 
 
 int main(int argc, char *argv[]) {
-
     int n_iter = 100;
     int conf = 2;
     double err = ((double)conf) / sqrt((double)n_iter);
@@ -199,16 +198,19 @@ int main(int argc, char *argv[]) {
     ASSERT_CQC_CALL(cqc_connect(cqc, hostname, portno));
 
     /* Test whether we can make the zero state */
-    printf("Testing |0> preparation......................\n");
+    printf("gates.c :: testing Z-basis preparation\n");
     ASSERT_TEST_CALL(cqc_test_qubit(cqc, make_zero, n_iter, err, 0, 0, 1));
 
     /* Test whether we can make the plus state */
-    printf("Testing |+> preparation......................\n");
+    printf("gates.c :: testing X-basis preparation\n");
     ASSERT_TEST_CALL(cqc_test_qubit(cqc, make_plus, n_iter, err, 1, 0, 0));
 
     /* Test whether we can make the y 0 eigenstate */
-    printf("Testing |1> preparation......................\n");
+    printf("gates.c :: testing Y-basis preparation\n");
     ASSERT_TEST_CALL(cqc_test_qubit(cqc, make_k, n_iter, err, 0, 1, 0));
+
+    cqc_close(cqc);
+    cqc_destroy(cqc);
 
     return 0;
 }
