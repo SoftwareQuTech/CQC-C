@@ -20,15 +20,20 @@ matrix:
       osx_image: xcode10.2
       env:
       - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
-      - PIPFLAG="--user"
+      - PIPFLAG=--user
+      - PATH=/Users/travis/Library/Python/3.7/bin:$PATH
+
 before_install:
   - eval "${MATRIX_EVAL}"
 install:
   - make -C test all
 script:
-  - pip3 install setuptools wheel "${PIPFLAG}"
-  - pip3 install simulaqron "${PIPFLAG}"
+  - pip3 install setuptools wheel $PIPFLAG
+  - pip3 install simulaqron $PIPFLAG
   - cd test
+  - which simulaqron
+  - pip3 show simulaqron
+  - pip3 list
   - "./test_using_simulaqron.sh -ci"
   - cd ..
 before_deploy:
