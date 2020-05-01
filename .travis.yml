@@ -26,8 +26,8 @@ before_install:
 install:
   - make -C test all
 script:
-  - pip3 install setuptools wheel $PIPFLAG
-  - pip3 install simulaqron $PIPFLAG
+  - pip3 install setuptools wheel "${PIPFLAG}"
+  - pip3 install simulaqron "${PIPFLAG}"
   - cd test
   - "./test_using_simulaqron.sh -ci"
   - cd ..
